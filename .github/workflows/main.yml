@@ -22,32 +22,21 @@ jobs:
         with:
           fetch-depth: 1
 
-      # 步骤2：安装并定位MSBuild（修复找不到MSBuild的核心步骤）
+      # 步骤2：安装并定位MSBuild
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v2
-        id: msbuild_setup  # 给步骤加ID，方便后续获取路径
+        id: msbuild_setup
 
-      # 步骤3：编译项目（Release模式，x64架构）
+      # 步骤3：编译项目（修复PowerShell语法错误，单行写法）
       - name: Build project
-        # 手动使用MSBuild的绝对路径编译，避免环境变量问题
         run: |
-          # 使用setup-msbuild返回的绝对路径调用MSBuild
-          "${{ steps.msbuild_setup.outputs.msbuild_path }}" `
-            "VMHide.sln" `
-            /t:Build `
-            /p:Configuration=Release `
-            /p:Platform=x64 `
-            /p:OutDir="./bin/x64/Release/" `
-            /p:WindowsTargetPlatformVersion=10.0.22621.0 `
-            /m  # 多线程编译，加快速度
+          # 单行完整命令，避免PowerShell换行解析错误
+          & "${{ steps.msbuild_setup.outputs.msbuild_path }}" "VMHide.sln" /t:Build /p:Configuration=Release /p:Platform=x64 /p:OutDir="./bin/x64/Release/" /p:WindowsTargetPlatformVersion=10.0.22621.0 /m
 
       # 步骤4：上传编译产物（exe文件），方便下载
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          # 产物名称，在Actions页面显示
           name: VMHide-x64-Release
-          # 指定要上传的文件路径（编译后的exe位置）
           path: ./bin/x64/Release/VMHide.exe
-          # 产物保留90天
           retention-days: 90
