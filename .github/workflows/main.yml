@@ -12,28 +12,22 @@ on:
 # 作业定义：在Windows环境下编译
 jobs:
   build:
-    # 指定运行环境为最新版Windows Server
     runs-on: windows-latest
     
     steps:
-      # 步骤1：检出仓库代码到云端虚拟机
+      # 步骤1：检出仓库代码
       - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 1
 
-      # 步骤2：安装并定位MSBuild
-      - name: Setup MSBuild
-        uses: microsoft/setup-msbuild@v2
-        id: msbuild_setup
-
-      # 步骤3：编译项目（修复PowerShell语法错误，单行写法）
-      - name: Build project
+      # 步骤2：直接使用硬编码的MSBuild路径编译（最稳定）
+      - name: Build project with hardcoded MSBuild path
         run: |
-          # 单行完整命令，避免PowerShell换行解析错误
-          & "${{ steps.msbuild_setup.outputs.msbuild_path }}" "VMHide.sln" /t:Build /p:Configuration=Release /p:Platform=x64 /p:OutDir="./bin/x64/Release/" /p:WindowsTargetPlatformVersion=10.0.22621.0 /m
+          # GitHub Windows-latest环境中VS2022 Enterprise的固定MSBuild路径
+          $msbuildPath = "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\MSBuild\Current\Bin\MSBuild.exe"
+          # 调用MSBuild编译项目，单行命令避免语法错误
+          & $msbuildPath "VMHide.sln" /t:Build /p:Configuration=Release /p:Platform=x64 /p:OutDir="./bin/x64/Release/" /p:WindowsTargetPlatformVersion=10.0.22621.0 /m
 
-      # 步骤4：上传编译产物（exe文件），方便下载
+      # 步骤3：上传编译产物
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
