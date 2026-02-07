@@ -32,5 +32,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: VMHide-x64-Release
-          path: ./bin/x64/Release/VMHide.exe
+          path: ./bin/x64/Release/VMHide.dll
           retention-days: 90
