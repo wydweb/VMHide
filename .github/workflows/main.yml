@@ -25,7 +25,7 @@ jobs:
           # GitHub Windows-latest环境中VS2022的MSBuild固定路径
           $msbuildPath = "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\MSBuild\Current\Bin\MSBuild.exe"
           # 核心改动：删除/p:WindowsTargetPlatformVersion参数，让MSBuild自动选SDK
-          & $msbuildPath "VMHide.sln" /t:Build /p:Configuration=Release /p:Platform=Win32 /p:OutDir="./bin/x86/Release/" /m
+          & $msbuildPath "VMHide.sln" /t:Build /p:Configuration=Release /p:Platform=x86 /p:OutDir="./bin/x86/Release/" /m
 
       # 步骤3：上传编译产物
       - name: Upload artifact
