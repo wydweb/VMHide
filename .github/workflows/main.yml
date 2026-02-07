@@ -1,0 +1,52 @@
+# 工作流名称，在GitHub Actions页面显示
+name: Build Windows Executable
+
+# 触发条件：push代码到main分支、手动触发、创建标签时执行
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:  # 允许手动触发
+  release:
+    types: [created]
+
+# 作业定义：在Windows环境下编译
+jobs:
+  build:
+    # 指定运行环境为最新版Windows Server
+    runs-on: windows-latest
+    
+    steps:
+      # 步骤1：检出仓库代码到云端虚拟机
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      # 步骤2：设置MSBuild环境（关键：安装VS构建工具）
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
+        with:
+          # 指定VS构建工具版本，win-latest默认带2022，兼容你的项目
+          vs-version: '2022'
+
+      # 步骤3：编译项目（Release模式，x64架构）
+      - name: Build project
+        # 使用MSBuild编译sln文件，指定输出目录和配置
+        run: |
+          msbuild "VMHide.sln" `
+            /t:Build `
+            /p:Configuration=Release `
+            /p:Platform=x64 `
+            /p:OutDir="./bin/x64/Release/" `
+            /m  # 多线程编译，加快速度
+
+      # 步骤4：上传编译产物（exe文件），方便下载
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          # 产物名称，在Actions页面显示
+          name: VMHide-x64-Release
+          # 指定要上传的文件路径（编译后的exe位置）
+          path: ./bin/x64/Release/VMHide.exe
+          # 产物保留90天
+          retention-days: 90
