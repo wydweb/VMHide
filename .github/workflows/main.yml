@@ -19,13 +19,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # 步骤2：直接使用硬编码的MSBuild路径编译（最稳定）
-      - name: Build project with hardcoded MSBuild path
+      # 步骤2：编译项目（去掉SDK版本指定，自动适配）
+      - name: Build project with auto SDK
         run: |
-          # GitHub Windows-latest环境中VS2022 Enterprise的固定MSBuild路径
+          # GitHub Windows-latest环境中VS2022的MSBuild固定路径
           $msbuildPath = "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\MSBuild\Current\Bin\MSBuild.exe"
-          # 调用MSBuild编译项目，单行命令避免语法错误
-          & $msbuildPath "VMHide.sln" /t:Build /p:Configuration=Release /p:Platform=x64 /p:OutDir="./bin/x64/Release/" /p:WindowsTargetPlatformVersion=10.0.22621.0 /m
+          # 核心改动：删除/p:WindowsTargetPlatformVersion参数，让MSBuild自动选SDK
+          & $msbuildPath "VMHide.sln" /t:Build /p:Configuration=Release /p:Platform=x64 /p:OutDir="./bin/x64/Release/" /m
 
       # 步骤3：上传编译产物
       - name: Upload artifact
